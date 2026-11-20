@@ -2,152 +2,282 @@
 <html lang="es">
 <head>
 <meta charset="utf-8">
-<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <title>Soporte antivibración final</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@600;700&family=Barlow:wght@400;500;600&family=JetBrains+Mono:wght@500&display=swap">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,600;12..96,800&family=Figtree:wght@400;500;600;700&family=DM+Mono:wght@500&display=swap">
 <style>
-/* Layout: una columna de lectura (760–1120 px); el visor 3D es la mesa de trabajo, con la lista de piezas a la derecha. */
-:root{--bg:#e6ebee;--panel:#f6f8f8;--ink:#172027;--muted:#52606a;--line:#cdd5da;--accent:#0b6f66;--accent-ink:#f4faf8;--warn:#a94811;--chip:#e7ecee;--stage:#dde4e7;--grid1:#b9c4ca;--grid2:#cfd7dc;
---display:'Barlow Condensed','Arial Narrow',Arial,sans-serif;--body:'Barlow',Arial,sans-serif;--mono:'JetBrains Mono','Courier New',monospace}
-@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#12181d;--panel:#1a2228;--ink:#e8eef0;--muted:#a0b0b9;--line:#303c44;--accent:#58c9b8;--accent-ink:#08221f;--warn:#f0985f;--chip:#27323a;--stage:#151c21;--grid1:#33414a;--grid2:#232d34;color-scheme:dark}}
-:root[data-theme="dark"]{--bg:#12181d;--panel:#1a2228;--ink:#e8eef0;--muted:#a0b0b9;--line:#303c44;--accent:#58c9b8;--accent-ink:#08221f;--warn:#f0985f;--chip:#27323a;--stage:#151c21;--grid1:#33414a;--grid2:#232d34;color-scheme:dark}
+/* Estilo tomado de Teoría Musical: vidrio para lo que flota (barra de secciones, controles del visor),
+   superficie sólida para el contenido y un color por ETAPA del soporte. Movimiento con resorte. */
+:root{
+  --bg:#eef0f4;--surface:#ffffff;--ink:#14161f;--muted:#5d6472;--line:#e3e6ec;--chip:#f1f3f6;
+  --stage:#e4e8ee;--grid1:#c3cad4;--grid2:#d6dce3;
+  --accent:#0f8a7e;--accent-ink:#ffffff;--warn:#c25a1c;
+  /* un color por etapa (como las áreas de Teoría Musical) */
+  --c-base:#7b8494;--c-e1:#f08a24;--c-m1:#13a89e;--c-e2:#8b5cf6;--c-m2:#e0508e;--c-pinza:#ef5a4c;
+  --glass-bg:rgb(255 255 255/.55);--glass-line:rgb(255 255 255/.85);
+  --glass-shadow:0 0 0 .5px rgb(16 18 28/.12),0 10px 30px rgb(16 18 28/.12),inset 0 1px 0 rgb(255 255 255/.8);
+  --card-shadow:0 1px 2px rgb(16 18 28/.05),0 12px 32px rgb(16 18 28/.07);
+  --blob-a:#7ee0d4;--blob-b:#c9b5ff;--blob-c:#ffc79a;
+  --display:'Bricolage Grotesque','Arial Narrow',Arial,sans-serif;--body:'Figtree',Arial,sans-serif;--mono:'DM Mono','Courier New',monospace;
+  --spring:cubic-bezier(.34,1.56,.64,1);--ease:cubic-bezier(.22,1,.36,1);
+}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){
+  --bg:#07080f;--surface:#151823;--ink:#eef0f6;--muted:#a3abba;--line:#262b38;--chip:#1e2230;
+  --stage:#0e1119;--grid1:#2c3342;--grid2:#1b202b;--accent:#4fd1c1;--accent-ink:#04201c;--warn:#f39a5f;
+  --glass-bg:rgb(255 255 255/.06);--glass-line:rgb(255 255 255/.18);
+  --glass-shadow:0 0 0 .5px rgb(0 0 0/.4),0 10px 30px rgb(0 0 0/.45),inset 0 1px 0 rgb(255 255 255/.16);
+  --card-shadow:0 0 0 1px rgb(255 255 255/.04),0 12px 32px rgb(0 0 0/.35);
+  --blob-a:#0f5d56;--blob-b:#3d2a7a;--blob-c:#6b3517;color-scheme:dark}}
+:root[data-theme="dark"]{
+  --bg:#07080f;--surface:#151823;--ink:#eef0f6;--muted:#a3abba;--line:#262b38;--chip:#1e2230;
+  --stage:#0e1119;--grid1:#2c3342;--grid2:#1b202b;--accent:#4fd1c1;--accent-ink:#04201c;--warn:#f39a5f;
+  --glass-bg:rgb(255 255 255/.06);--glass-line:rgb(255 255 255/.18);
+  --glass-shadow:0 0 0 .5px rgb(0 0 0/.4),0 10px 30px rgb(0 0 0/.45),inset 0 1px 0 rgb(255 255 255/.16);
+  --card-shadow:0 0 0 1px rgb(255 255 255/.04),0 12px 32px rgb(0 0 0/.35);
+  --blob-a:#0f5d56;--blob-b:#3d2a7a;--blob-c:#6b3517;color-scheme:dark}
 *{box-sizing:border-box}
+html{scroll-behavior:smooth;scroll-padding-top:16px}
 html,body{margin:0}
-body{background:var(--bg);color:var(--ink);font:400 17px/1.5 var(--body)}
-main{max-width:1120px;margin:0 auto;padding-block:40px 64px;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));display:flex;flex-direction:column;gap:56px}
-section{display:flex;flex-direction:column;gap:18px;min-width:0}
-h1{margin:0;font:700 clamp(38px,6vw,56px)/1 var(--display);text-wrap:balance}
-h2{margin:0;font:700 32px/1.1 var(--display);text-wrap:balance}
-h3{margin:0;font:700 22px/1.15 var(--display);color:var(--accent)}
+body{background:var(--bg);color:var(--ink);font:400 17px/1.55 var(--body);-webkit-font-smoothing:antialiased;overflow-x:hidden}
+/* manchas de color detrás, para que el vidrio tenga algo que desenfocar */
+.blobs{position:fixed;inset:0;z-index:-1;pointer-events:none;opacity:.6;
+  background:radial-gradient(60vmax 60vmax at 0% 0%,var(--blob-a),transparent 60%),radial-gradient(50vmax 50vmax at 100% 45%,var(--blob-b),transparent 60%),radial-gradient(50vmax 45vmax at 25% 100%,var(--blob-c),transparent 60%)}
+main{max-width:1120px;margin:0 auto;padding-block:max(28px,env(safe-area-inset-top,0px)) 140px;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));display:flex;flex-direction:column;gap:72px}
+section{display:flex;flex-direction:column;gap:20px;min-width:0}
+h1{margin:0;font:800 clamp(40px,8vw,72px)/.98 var(--display);letter-spacing:-.02em;text-wrap:balance}
+h1 em{font-style:normal;background:linear-gradient(100deg,var(--c-e1),var(--c-m2) 50%,var(--c-e2));-webkit-background-clip:text;background-clip:text;color:transparent}
+h2{margin:0;font:800 clamp(30px,5vw,40px)/1.05 var(--display);letter-spacing:-.01em;text-wrap:balance}
+h3{margin:0;font:700 21px/1.2 var(--display)}
 p{margin:0}
-.eyebrow{font:500 13px/1.3 var(--mono);letter-spacing:1.2px;text-transform:uppercase;color:var(--accent)}
-.lead{color:var(--muted);max-width:62ch;font-size:19px}
-.intro{display:flex;flex-direction:column;gap:14px}
-.team{color:var(--muted);font-size:15px}
-.facts{display:flex;flex-wrap:wrap;gap:8px;margin-top:4px}
-.facts span{font:500 13px/1 var(--mono);background:var(--chip);border-radius:6px;padding:8px 10px}
-.facts b{color:var(--accent);font-weight:500}
-.sechead{display:flex;flex-direction:column;gap:6px}
-.sechead p{color:var(--muted);max-width:64ch}
+b{font-weight:600}
 
-/* visor */
-.viewer{display:grid;grid-template-columns:minmax(0,1fr) 340px;border:1px solid var(--line);border-radius:10px;overflow:hidden;background:var(--panel)}
-.stage{position:relative;height:clamp(420px,70vh,640px);background:var(--stage);min-width:0}
+/* ---- vidrio ---- */
+.glass{background:var(--glass-bg);border:1px solid var(--glass-line);box-shadow:var(--glass-shadow);-webkit-backdrop-filter:blur(18px) saturate(1.6);backdrop-filter:blur(18px) saturate(1.6)}
+@media (prefers-reduced-transparency:reduce){.glass{background:var(--surface);-webkit-backdrop-filter:none;backdrop-filter:none}}
+
+/* ---- portada ---- */
+.intro{display:flex;flex-direction:column;gap:18px;padding-top:12px}
+.eyebrow{align-self:flex-start;display:inline-flex;align-items:center;gap:8px;font:500 12px/1 var(--mono);letter-spacing:1px;text-transform:uppercase;color:var(--ink);padding:9px 14px;border-radius:999px}
+.eyebrow::before{content:"";width:8px;height:8px;border-radius:50%;background:var(--accent);box-shadow:0 0 0 4px color-mix(in srgb,var(--accent) 25%,transparent);animation:pulse 2.4s var(--ease) infinite}
+@keyframes pulse{50%{box-shadow:0 0 0 8px color-mix(in srgb,var(--accent) 0%,transparent)}}
+.lead{color:var(--muted);max-width:60ch;font-size:19px}
+.team{display:flex;flex-wrap:wrap;gap:8px}
+.team span{font:500 14px/1 var(--body);padding:9px 13px;border-radius:999px;background:var(--surface);box-shadow:var(--card-shadow)}
+.facts{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px;margin-top:6px}
+.fact{position:relative;overflow:hidden;border-radius:24px;padding:18px 18px 16px;color:#fff;background:var(--c);box-shadow:0 10px 26px color-mix(in srgb,var(--c) 35%,transparent)}
+.fact::after{content:"";position:absolute;inset:3px 3px auto;height:46%;border-radius:21px 21px 50% 50%/21px 21px 30% 30%;background:linear-gradient(rgb(255 255 255/.35),rgb(255 255 255/0));pointer-events:none}
+.fact b{display:block;font:800 clamp(38px,7vw,52px)/1 var(--display);font-variant-numeric:tabular-nums}
+.fact span{display:block;margin-top:4px;font:600 14px/1.25 var(--body);opacity:.95}
+.sechead{display:flex;flex-direction:column;gap:8px}
+.sechead p{color:var(--muted);max-width:64ch}
+.kicker{font:500 12px/1 var(--mono);letter-spacing:1px;text-transform:uppercase;color:var(--accent)}
+
+/* ---- barra de secciones (como la de pestañas de Teoría Musical) ---- */
+.tabs{position:fixed;z-index:20;left:50%;bottom:max(14px,env(safe-area-inset-bottom,0px));transform:translateX(-50%);max-width:calc(100vw - 24px);border-radius:999px;padding:5px}
+.tabs .track{position:relative;display:flex;gap:2px;overflow-x:auto;scrollbar-width:none;border-radius:999px}
+.tabs .track::-webkit-scrollbar{display:none}
+.tabs a{position:relative;z-index:1;flex:none;display:flex;align-items:center;gap:6px;padding:11px 15px;border-radius:999px;font:600 14px/1 var(--body);color:var(--muted);text-decoration:none;white-space:nowrap;transition:color .3s var(--ease)}
+.tabs a svg{width:18px;height:18px;flex:none}
+.tabs a[aria-current="true"]{color:var(--ink)}
+.tabs a:not([aria-current="true"]) .lbl{display:none}
+.pill{position:absolute;z-index:0;top:0;bottom:0;left:0;width:0;border-radius:999px;background:var(--surface);box-shadow:0 2px 10px rgb(16 18 28/.14),inset 0 1px 0 rgb(255 255 255/.6);transition:transform .55s var(--spring),width .55s var(--spring)}
+
+/* ---- segmentado (vistas del visor) ---- */
+.seg{position:relative;display:inline-flex;padding:4px;border-radius:999px}
+.seg button{position:relative;z-index:1;border:0;background:none;padding:9px 14px;border-radius:999px;font:600 14px/1 var(--body);color:var(--muted);cursor:pointer;transition:color .3s var(--ease)}
+.seg button[aria-pressed="true"]{color:var(--ink)}
+.seg .pill{top:4px;bottom:4px}
+
+button{font:500 15px/1.2 var(--body);color:var(--ink);cursor:pointer;-webkit-tap-highlight-color:transparent}
+:focus-visible{outline:3px solid var(--accent);outline-offset:2px}
+
+/* ---- visor ---- */
+.viewer{display:grid;grid-template-columns:minmax(0,1fr) 350px;border-radius:32px;overflow:hidden;background:var(--surface);box-shadow:var(--card-shadow)}
+.stage{position:relative;height:clamp(440px,72vh,660px);background:var(--stage);min-width:0}
 #c{display:block;width:100%;height:100%;cursor:grab;touch-action:none}
 #c:active{cursor:grabbing}
-.hint{position:absolute;left:14px;top:12px;margin:0;font:500 12px/1.3 var(--mono);color:var(--muted);pointer-events:none}
-.views{position:absolute;left:12px;bottom:12px;display:flex;gap:6px;flex-wrap:wrap}
-button{font:500 14px/1.2 var(--body);color:var(--ink);background:var(--chip);border:1px solid transparent;border-radius:6px;padding:7px 11px;cursor:pointer}
-.views button{background:var(--panel);border-color:var(--line)}
-button:hover{border-color:var(--muted)}
-:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
-.side{display:flex;flex-direction:column;border-left:1px solid var(--line);min-width:0;height:clamp(420px,70vh,640px)}
-.ctl{padding:14px 16px;display:flex;flex-direction:column;gap:10px;border-bottom:1px solid var(--line)}
-.ctl .row{display:grid;grid-template-columns:auto 1fr 54px;gap:10px;align-items:center;font-size:15px}
-.ctl output{font:500 13px/1 var(--mono);text-align:right;font-variant-numeric:tabular-nums}
-.checks{display:flex;flex-wrap:wrap;gap:6px 14px;font-size:14px;color:var(--muted)}
-.checks label{display:flex;align-items:center;gap:6px;cursor:pointer}
-input[type=range],input[type=checkbox]{accent-color:var(--accent)}
-input[type=range]{width:100%}
-#detail{padding:12px 16px;border-bottom:1px solid var(--line);font-size:14px;min-height:86px;background:var(--chip)}
-#detail strong{display:flex;align-items:center;gap:8px;font:600 16px/1.25 var(--body);margin-bottom:4px}
+.hint{position:absolute;left:14px;top:14px;margin:0;display:flex;align-items:center;gap:8px;font:500 12px/1 var(--mono);color:var(--ink);padding:9px 12px;border-radius:999px;pointer-events:none;transition:opacity .6s var(--ease)}
+.hint.off{opacity:0}
+.views{position:absolute;left:50%;bottom:14px;transform:translateX(-50%);max-width:calc(100% - 24px)}
+.side{display:flex;flex-direction:column;min-width:0;height:clamp(440px,72vh,660px)}
+.ctl{padding:18px;display:flex;flex-direction:column;gap:16px;border-bottom:1px solid var(--line)}
+.slider{display:flex;flex-direction:column;gap:10px}
+.slider .top{display:flex;justify-content:space-between;align-items:baseline;font:600 15px/1 var(--body)}
+.slider output{font:500 14px/1 var(--mono);font-variant-numeric:tabular-nums;color:var(--accent);padding:6px 10px;border-radius:999px;background:color-mix(in srgb,var(--accent) 12%,transparent);transition:transform .35s var(--spring)}
+.slider output.pop{transform:scale(1.12)}
+/* range con relleno de color y perilla de vidrio */
+input[type=range]{-webkit-appearance:none;appearance:none;width:100%;height:30px;background:none;margin:0;--p:0%;cursor:pointer;touch-action:pan-y}
+input[type=range]::-webkit-slider-runnable-track{height:12px;border-radius:99px;background:linear-gradient(90deg,var(--c-e1),var(--c-m2),var(--c-e2)) 0/var(--p) 100% no-repeat,var(--chip);box-shadow:inset 0 1px 2px rgb(0 0 0/.12)}
+input[type=range]::-moz-range-track{height:12px;border-radius:99px;background:var(--chip)}
+input[type=range]::-moz-range-progress{height:12px;border-radius:99px;background:linear-gradient(90deg,var(--c-e1),var(--c-m2),var(--c-e2))}
+input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:30px;height:30px;margin-top:-9px;border-radius:50%;background:#fff;border:1px solid rgb(255 255 255/.9);box-shadow:0 0 0 .5px rgb(0 0 0/.15),0 4px 12px rgb(0 0 0/.22),inset 0 -3px 6px rgb(0 0 0/.06);transition:transform .35s var(--spring)}
+input[type=range]::-moz-range-thumb{width:28px;height:28px;border-radius:50%;background:#fff;border:0;box-shadow:0 0 0 .5px rgb(0 0 0/.15),0 4px 12px rgb(0 0 0/.22)}
+input[type=range]:active::-webkit-slider-thumb{transform:scale(1.18)}
+/* interruptores tipo iOS */
+.checks{display:flex;flex-direction:column;gap:2px}
+.checks label{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:8px 0;font:500 15px/1.2 var(--body);cursor:pointer}
+input[type=checkbox]{-webkit-appearance:none;appearance:none;flex:none;position:relative;width:51px;height:31px;margin:0;border-radius:99px;background:var(--line);cursor:pointer;transition:background .3s var(--ease)}
+input[type=checkbox]::after{content:"";position:absolute;top:2px;left:2px;width:27px;height:27px;border-radius:50%;background:#fff;box-shadow:0 3px 8px rgb(0 0 0/.18),0 0 0 .5px rgb(0 0 0/.06);transition:transform .45s var(--spring)}
+input[type=checkbox]:checked{background:var(--accent)}
+input[type=checkbox]:checked::after{transform:translateX(20px)}
+#detail{margin:14px 14px 4px;padding:14px 16px;border-radius:20px;font-size:14px;min-height:88px;background:var(--chip);transition:background .4s var(--ease)}
+#detail.on{background:color-mix(in srgb,var(--sel,var(--accent)) 14%,var(--surface));animation:pop .45s var(--spring)}
+@keyframes pop{from{transform:scale(.96);opacity:.6}}
+#detail strong{display:flex;align-items:center;gap:8px;font:700 17px/1.25 var(--display);margin-bottom:4px}
 #detail span.i{color:var(--muted)}
-.list{overflow:auto;flex:1;padding:4px 16px 16px}
-.grp{font:500 11px/1.2 var(--mono);text-transform:uppercase;letter-spacing:1px;color:var(--muted);margin:14px 0 4px}
-.list button{width:100%;display:grid;grid-template-columns:12px minmax(0,1fr) auto;gap:9px;align-items:center;text-align:left;background:none;border:0;border-bottom:1px solid var(--line);border-radius:0;padding:7px 2px;font-size:14.5px}
+.list{overflow:auto;flex:1;padding:0 14px 16px}
+.grp{display:flex;align-items:center;gap:8px;font:500 11px/1.2 var(--mono);text-transform:uppercase;letter-spacing:1px;color:var(--c,var(--muted));margin:18px 4px 6px}
+.grp::before{content:"";width:8px;height:8px;border-radius:50%;background:var(--c,var(--muted))}
+.list button{width:100%;display:grid;grid-template-columns:14px minmax(0,1fr) auto;gap:10px;align-items:center;text-align:left;background:none;border:0;border-radius:14px;padding:10px 10px;font-size:14.5px;transition:background .25s var(--ease),transform .4s var(--spring)}
 .list button:hover{background:var(--chip)}
-.list button[aria-pressed="true"]{background:var(--chip);font-weight:600}
-.dot{width:12px;height:12px;border-radius:3px;border:1px solid rgba(0,0,0,.25)}
-.tag{font:500 10.5px/1 var(--mono);text-transform:uppercase;letter-spacing:.4px;color:var(--accent)}
-.tag.buy{color:var(--warn)}
-.tag.ref{color:var(--muted)}
+.list button:active{transform:scale(.97)}
+.list button[aria-pressed="true"]{background:color-mix(in srgb,var(--c,var(--accent)) 16%,transparent);font-weight:600}
+.dot{width:14px;height:14px;border-radius:5px;border:1px solid rgba(0,0,0,.2)}
+.tag{font:500 10.5px/1 var(--mono);text-transform:uppercase;letter-spacing:.4px;padding:5px 7px;border-radius:99px;color:var(--accent);background:color-mix(in srgb,var(--accent) 12%,transparent)}
+.tag.buy{color:var(--warn);background:color-mix(in srgb,var(--warn) 12%,transparent)}
+.tag.ref{color:var(--muted);background:var(--chip)}
 
-/* cómo funciona */
-.how{display:grid;grid-template-columns:minmax(0,1fr) 380px;gap:36px;align-items:start}
-.steps{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:18px;counter-reset:s}
-.steps li{display:grid;grid-template-columns:34px minmax(0,1fr);gap:12px;counter-increment:s}
-.steps li::before{content:counter(s);font:700 26px/1 var(--display);color:var(--accent);padding-top:2px}
+/* ---- cómo funciona ---- */
+.how{display:grid;grid-template-columns:minmax(0,1fr) 380px;gap:28px;align-items:start}
+.steps{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:12px;counter-reset:s}
+.steps li{position:relative;display:grid;grid-template-columns:48px minmax(0,1fr);gap:14px;counter-increment:s;padding:18px;border-radius:26px;background:var(--surface);box-shadow:var(--card-shadow);overflow:hidden}
+.steps li::before{content:counter(s);display:grid;place-items:center;width:48px;height:48px;border-radius:16px;font:800 22px/1 var(--display);color:#fff;background:var(--c);box-shadow:0 6px 16px color-mix(in srgb,var(--c) 40%,transparent),inset 0 1px 0 rgb(255 255 255/.4)}
+.steps li::after{content:"";position:absolute;left:0;top:18px;bottom:18px;width:4px;border-radius:0 4px 4px 0;background:var(--c)}
+.steps h3{color:var(--c)}
 .steps p{color:var(--muted);margin-top:4px;max-width:62ch}
-.steps b{color:var(--ink);font-weight:600}
-.model{background:var(--panel);border:1px solid var(--line);border-radius:10px;padding:16px;display:flex;flex-direction:column;gap:12px;position:sticky;top:calc(env(safe-area-inset-top,0px) + 16px)}
+.steps p b{color:var(--ink)}
+.model{background:var(--surface);border-radius:28px;padding:18px;display:flex;flex-direction:column;gap:12px;position:sticky;top:16px;box-shadow:var(--card-shadow)}
 .model>svg{width:100%;height:auto;display:block}
 .model>svg .ln{stroke:var(--ink);fill:none;stroke-width:2;stroke-linejoin:round;stroke-linecap:round}
-.model>svg .m{fill:var(--chip);stroke:var(--ink);stroke-width:2}
+.model>svg .m{stroke-width:2}
+.model>svg .m2{fill:color-mix(in srgb,var(--c-m2) 20%,var(--surface));stroke:var(--c-m2)}
+.model>svg .m1{fill:color-mix(in srgb,var(--c-m1) 20%,var(--surface));stroke:var(--c-m1)}
+.model>svg .k2{stroke:var(--c-e2)}
+.model>svg .k1{stroke:var(--c-e1)}
 .model>svg .gnd{fill:var(--line)}
 .model>svg text{fill:var(--ink);font:500 14px var(--mono)}
 .model>svg text.s{fill:var(--muted);font:400 13px var(--body)}
-.model>svg text.k{fill:var(--accent)}
-.eq{overflow-x:auto;font-size:15px;color:var(--ink)}
+.model>svg text.t2{fill:var(--c-e2)}
+.model>svg text.t1{fill:var(--c-e1)}
+.spring{transform-box:fill-box;transform-origin:center bottom;animation:boing 1.6s var(--ease) infinite alternate}
+.spring.b{animation-duration:.9s}
+@keyframes boing{to{transform:scaleY(.9)}}
+.eq{overflow-x:auto;font-size:15px;color:var(--ink);padding:12px;border-radius:16px;background:var(--chip)}
 .model .note{font-size:14px;color:var(--muted)}
 
-/* tablas */
-.two{display:grid;grid-template-columns:1fr 1fr;gap:24px}
-.tbl{overflow-x:auto;background:var(--panel);border:1px solid var(--line);border-radius:10px;min-width:0}
+/* ---- tablas ---- */
+.tbl{overflow-x:auto;background:var(--surface);border-radius:28px;min-width:0;box-shadow:var(--card-shadow)}
 table{border-collapse:collapse;width:100%;font-size:15px}
-caption{text-align:left;padding:14px 16px 6px;font:700 22px/1.1 var(--display);caption-side:top}
-caption .tag{margin-left:8px;vertical-align:3px}
-th,td{text-align:left;padding:9px 16px;border-bottom:1px solid var(--line);vertical-align:top}
+th,td{text-align:left;padding:13px 18px;border-bottom:1px solid var(--line);vertical-align:top}
+tbody tr{transition:background .2s var(--ease)}
+tbody tr:hover{background:var(--chip)}
 tr:last-child td{border-bottom:0}
-th{font:500 11px/1.2 var(--mono);text-transform:uppercase;letter-spacing:.8px;color:var(--muted)}
-td.n{font-family:var(--mono);font-variant-numeric:tabular-nums;text-align:right;white-space:nowrap;width:1%}
+th{font:500 11px/1.2 var(--mono);text-transform:uppercase;letter-spacing:.8px;color:var(--muted);padding-top:18px}
+td.n{text-align:right;white-space:nowrap;width:1%}
+td.n span{display:inline-grid;place-items:center;min-width:34px;height:34px;padding:0 8px;border-radius:12px;font:500 15px/1 var(--mono);font-variant-numeric:tabular-nums;background:color-mix(in srgb,var(--c,var(--accent)) 14%,transparent);color:var(--c,var(--accent))}
 th.n{text-align:right}
 td small{display:block;color:var(--muted);font-size:13.5px}
-.cmp td:first-child{font-weight:600;white-space:nowrap}
-.cmp td:nth-child(2){color:var(--muted)}
+.mat td:first-child{border-left:4px solid var(--c,transparent)}
+.filter{display:flex;flex-wrap:wrap;gap:8px}
+.filter button{border:0;padding:10px 14px;border-radius:999px;font:600 14px/1 var(--body);background:var(--surface);box-shadow:var(--card-shadow);color:var(--muted);transition:transform .4s var(--spring),background .25s,color .25s}
+.filter button:active{transform:scale(.94)}
+.filter button[aria-pressed="true"]{background:var(--ink);color:var(--bg)}
+.mat tr.hide{display:none}
+/* comparación: tarjetas antes → después */
+.cmp{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}
+.cmp article{background:var(--surface);border-radius:24px;padding:16px 18px;box-shadow:var(--card-shadow);display:flex;flex-direction:column;gap:10px}
+.cmp h3{font-size:18px}
+.cmp .vs{display:grid;grid-template-columns:minmax(0,1fr) 22px minmax(0,1fr);gap:8px;align-items:center;font-size:14.5px}
+.cmp .old{color:var(--muted);text-decoration:line-through;text-decoration-color:color-mix(in srgb,var(--muted) 50%,transparent)}
+.cmp .new{font-weight:600;padding:10px 12px;border-radius:14px;background:color-mix(in srgb,var(--accent) 12%,transparent)}
+.cmp .arrow{color:var(--accent);font:700 18px/1 var(--display);text-align:center}
 
-/* enlaces */
-.cards{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:14px}
-a.card{display:flex;flex-direction:column;gap:6px;background:var(--panel);border:1px solid var(--line);border-radius:8px;padding:16px;color:var(--ink);text-decoration:none}
-a.card:hover{border-color:var(--accent)}
-a.card span{color:var(--muted);font-size:15px}
+/* ---- simulaciones ---- */
+a.hero{position:relative;overflow:hidden;display:flex;flex-direction:column;gap:12px;padding:28px;border-radius:32px;color:#fff;text-decoration:none;background:linear-gradient(135deg,var(--c-m1),var(--c-e2) 55%,var(--c-m2));box-shadow:0 18px 40px color-mix(in srgb,var(--c-e2) 35%,transparent);transition:transform .5s var(--spring)}
+a.hero:hover{transform:translateY(-3px)}
+a.hero:active{transform:scale(.98)}
+a.hero h3{font:800 clamp(28px,5vw,38px)/1.05 var(--display);color:#fff}
+a.hero p{max-width:52ch;opacity:.95}
+a.hero .go{align-self:flex-start;margin-top:6px;padding:13px 20px;border-radius:999px;font:700 16px/1 var(--body);color:#fff;background:rgb(255 255 255/.2);border:1px solid rgb(255 255 255/.7);box-shadow:inset 0 1.5px 0 rgb(255 255 255/.7),0 6px 18px rgb(0 0 0/.15);-webkit-backdrop-filter:blur(10px);backdrop-filter:blur(10px)}
+a.hero svg.wave{position:absolute;right:-20px;bottom:-10px;width:60%;max-width:420px;opacity:.35;pointer-events:none}
+.chips{display:flex;flex-wrap:wrap;gap:6px}
+.chips span{font:500 13px/1 var(--body);padding:7px 10px;border-radius:999px;background:rgb(255 255 255/.18);border:1px solid rgb(255 255 255/.35)}
+
+/* ---- aparecer al llegar ---- */
+.rv{opacity:0;transform:translateY(24px) scale(.98);transition:opacity .7s var(--ease),transform .8s var(--spring)}
+.rv.in{opacity:1;transform:none}
 
 @media (max-width:900px){
   .viewer{grid-template-columns:1fr}
-  .side{border-left:0;border-top:1px solid var(--line);height:auto}
+  .side{height:auto}
   .list{max-height:380px}
   .how{grid-template-columns:1fr}
   .model{position:static}
-  .two,.cards{grid-template-columns:1fr}
+  .cmp{grid-template-columns:1fr}
 }
-@media (max-width:520px){.stage{height:400px}.hint{display:none}}
-@media (prefers-reduced-motion:reduce){*{scroll-behavior:auto}}
+@media (max-width:520px){
+  .stage{height:430px}
+  .facts{gap:8px}
+  .fact{padding:14px 12px;border-radius:20px}
+  .fact span{font-size:12.5px}
+  .steps li{grid-template-columns:40px minmax(0,1fr);padding:16px 14px;gap:12px}
+  .steps li::before{width:40px;height:40px;border-radius:13px;font-size:19px}
+  th,td{padding:12px 14px}
+  .seg button{padding:9px 12px}
+  a.hero{padding:22px}
+  .cmp .vs{grid-template-columns:1fr;gap:6px}
+  .cmp .arrow{transform:rotate(90deg);width:22px}
+}
+@media (prefers-reduced-motion:reduce){
+  html{scroll-behavior:auto}
+  *,*::before,*::after{animation:none!important;transition:none!important}
+  .rv{opacity:1;transform:none}
+}
 </style>
 </head>
 <body>
+<div class="blobs" aria-hidden="true"></div>
 <main>
-<header class="intro">
-  <p class="eyebrow">Modelo final · Vibraciones Mecánicas · Equipo Camaradas</p>
-  <h1>Soporte antivibración en dos etapas</h1>
+<header class="intro" id="inicio">
+  <p class="eyebrow glass">Modelo final · Vibraciones Mecánicas</p>
+  <h1>Soporte antivibración en <em>dos etapas</em></h1>
   <p class="lead">El diseño que vamos a construir, con las piezas exportadas de SolidWorks. Protege el celular de un repartidor de la vibración de la moto: unos bujes de hule filtran lo rápido del motor y unos cables de acero en espiral, guiados por láminas, se llevan lo lento.</p>
-  <p class="team">Bocanegra González Jorge · Nava González Miguel Ángel · Lara Lizardi José Froylán · Ramírez Rosas Roberto</p>
   <div class="facts">
-    <span><b>2</b> etapas de aislamiento</span>
-    <span><b>21</b> materiales</span>
-    <span>medidas en <b>mm</b></span>
+    <div class="fact" style="--c:var(--c-e1)"><b data-count="2">2</b><span>etapas de aislamiento</span></div>
+    <div class="fact" style="--c:var(--c-e2)"><b data-count="21">21</b><span>materiales</span></div>
+    <div class="fact" style="--c:var(--c-m1)"><b>mm</b><span>todas las medidas</span></div>
+  </div>
+  <div class="team" aria-label="Equipo Camaradas">
+    <span>Bocanegra González Jorge</span><span>Nava González Miguel Ángel</span><span>Lara Lizardi José Froylán</span><span>Ramírez Rosas Roberto</span>
   </div>
 </header>
 
-<section id="modelo">
+<section id="modelo" class="rv">
   <div class="sechead">
+    <span class="kicker">Explóralo</span>
     <h2>Modelo 3D</h2>
-    <p>Gíralo con el dedo o el ratón y acerca con la rueda. Toca una pieza en el modelo o en la lista para verla sola; vuelve a tocarla para ver todo.</p>
+    <p>Toca una pieza para verla sola; tócala otra vez para ver todo.</p>
   </div>
   <div class="viewer">
     <div class="stage">
       <canvas id="c" aria-label="Modelo 3D del soporte antivibración"></canvas>
-      <p class="hint">Arrastra para girar · rueda para acercar</p>
-      <div class="views">
-        <button data-v="iso">Iso</button><button data-v="frente">Frente</button><button data-v="lado">Lado</button><button data-v="atras">Atrás</button>
+      <p class="hint glass" id="hint">Arrastra para girar</p>
+      <div class="views seg glass" role="group" aria-label="Vista">
+        <span class="pill" aria-hidden="true"></span>
+        <button data-v="iso" aria-pressed="true">Iso</button><button data-v="frente" aria-pressed="false">Frente</button><button data-v="lado" aria-pressed="false">Lado</button><button data-v="atras" aria-pressed="false">Atrás</button>
       </div>
     </div>
     <div class="side">
       <div class="ctl">
-        <label class="row" for="ex">Explosionar <input id="ex" type="range" min="0" max="70" value="0"><output id="exv">0 mm</output></label>
+        <div class="slider">
+          <label class="top" for="ex">Explosionar <output id="exv">0 mm</output></label>
+          <input id="ex" type="range" min="0" max="70" value="0">
+        </div>
         <div class="checks">
-          <label><input id="ph" type="checkbox" checked>Celular</label>
-          <label><input id="mb" type="checkbox" checked>Manubrio</label>
-          <label><input id="tp" type="checkbox">Tapa de pinza transparente</label>
+          <label>Celular <input id="ph" type="checkbox" checked></label>
+          <label>Manubrio <input id="mb" type="checkbox" checked></label>
+          <label>Tapa de pinza transparente <input id="tp" type="checkbox"></label>
         </div>
       </div>
       <div id="detail"><strong>Ninguna pieza seleccionada</strong><span class="i">Elige una en la lista o tócala en el modelo.</span></div>
@@ -156,40 +286,41 @@ a.card span{color:var(--muted);font-size:15px}
   </div>
 </section>
 
-<section id="funciona">
+<section id="funciona" class="rv">
   <div class="sechead">
+    <span class="kicker">De abajo hacia arriba</span>
     <h2>Cómo funciona</h2>
-    <p>De abajo hacia arriba. Cada etapa es un resorte con amortiguador, y un resorte solo aísla arriba de \(\sqrt{2}\,f_n\). Con dos etapas en serie, lo rápido del motor se corta dos veces.</p>
+    <p>Cada etapa es un resorte con amortiguador, y un resorte solo aísla arriba de \(\sqrt{2}\,f_n\). Con dos etapas en serie, lo rápido del motor se corta dos veces.</p>
   </div>
   <div class="how">
     <ol class="steps">
-      <li><div><h3>Base en H y abrazadera</h3><p>El manubrio de <b>Ø28.6</b> asienta en el bloque en V y la <b>abrazadera en U M5</b> lo aprieta contra la base. Es la única pieza fija a la moto: todo lo demás flota.</p></div></li>
-      <li><div><h3>Etapa 1: bujes de hule</h3><p><b>4 bujes Ø16 × 20</b> entre la base y la placa m1, cada uno atravesado por un tornillo <b>M4 × 40</b> con tuerca de nylon. Son el resorte \(k_1\) y amortiguan mucho; filtran la vibración rápida del motor.</p></div></li>
-      <li><div><h3>Masa intermedia</h3><p>La <b>placa m1</b> lleva atornillados <b>2 rieles de acero de 1/2″</b>. Cada riel pesa unos 142 g (12.7 × 12.7 × 112 mm de acero), así que hacen de lastre de \(m_1\) y además sujetan el cable por abajo.</p></div></li>
-      <li><div><h3>Etapa 2: cables en espiral</h3><p>Dos <b>cables de acero de 1/32″</b> dan 6 vueltas de Ø39 con paso de 18 mm, pasando por los 7 barrenos de cada riel y los 6 de cada barra. Son el resorte blando \(k_2\): dan la frecuencia baja.</p></div></li>
-      <li><div><h3>Guía de láminas y topes</h3><p><b>4 láminas de acero de resorte</b> (hoja de calibrador de 13 × 74 mm) van prensadas entre pilares, separadores y tapas. Son blandas hacia arriba y rígidas al giro, así que el piso sube y baja sin ladearse al frenar. <b>2 gomas de tope</b> lo detienen al final del recorrido.</p></div></li>
-      <li><div><h3>Piso del celular</h3><p>El <b>piso m2</b> tiene el respaldo inclinado <b>15°</b> y abajo lleva <b>2 barras de acero de 3/8″</b> que sujetan el cable por arriba. Todo lo que está arriba de los cables es \(m_2\).</p></div></li>
-      <li><div><h3>Pinza de cremallera</h3><p>La perilla gira un tornillo <b>M5 × 80</b> que mueve el brazo derecho; su cremallera hace girar el <b>engrane de 12 dientes</b> (módulo 1.5) y este mueve el brazo izquierdo al revés. Los dos brazos cierran a la vez y el celular queda centrado. La pinza se atornilla al respaldo con 2 M4 × 16.</p></div></li>
+      <li style="--c:var(--c-base)"><div><h3>Base en H y abrazadera</h3><p>El manubrio de <b>Ø28.6</b> asienta en el bloque en V y la <b>abrazadera en U M5</b> lo aprieta contra la base. Es la única pieza fija a la moto: todo lo demás flota.</p></div></li>
+      <li style="--c:var(--c-e1)"><div><h3>Etapa 1: bujes de hule</h3><p><b>4 bujes Ø16 × 20</b> entre la base y la placa m1, cada uno atravesado por un tornillo <b>M4 × 40</b> con tuerca de nylon. Son el resorte \(k_1\) y amortiguan mucho; filtran la vibración rápida del motor.</p></div></li>
+      <li style="--c:var(--c-m1)"><div><h3>Masa intermedia</h3><p>La <b>placa m1</b> lleva atornillados <b>2 rieles de acero de 1/2″</b>. Cada riel pesa unos 142 g (12.7 × 12.7 × 112 mm de acero), así que hacen de lastre de \(m_1\) y además sujetan el cable por abajo.</p></div></li>
+      <li style="--c:var(--c-e2)"><div><h3>Etapa 2: cables en espiral</h3><p>Dos <b>cables de acero de 1/32″</b> dan 6 vueltas de Ø39 con paso de 18 mm, pasando por los 7 barrenos de cada riel y los 6 de cada barra. Son el resorte blando \(k_2\): dan la frecuencia baja.</p></div></li>
+      <li style="--c:var(--c-e2)"><div><h3>Guía de láminas y topes</h3><p><b>4 láminas de acero de resorte</b> (hoja de calibrador de 13 × 74 mm) van prensadas entre pilares, separadores y tapas. Son blandas hacia arriba y rígidas al giro, así que el piso sube y baja sin ladearse al frenar. <b>2 gomas de tope</b> lo detienen al final del recorrido.</p></div></li>
+      <li style="--c:var(--c-m2)"><div><h3>Piso del celular</h3><p>El <b>piso m2</b> tiene el respaldo inclinado <b>15°</b> y abajo lleva <b>2 barras de acero de 3/8″</b> que sujetan el cable por arriba. Todo lo que está arriba de los cables es \(m_2\).</p></div></li>
+      <li style="--c:var(--c-pinza)"><div><h3>Pinza de cremallera</h3><p>La perilla gira un tornillo <b>M5 × 80</b> que mueve el brazo derecho; su cremallera hace girar el <b>engrane de 12 dientes</b> (módulo 1.5) y este mueve el brazo izquierdo al revés. Los dos brazos cierran a la vez y el celular queda centrado. La pinza se atornilla al respaldo con 2 M4 × 16.</p></div></li>
     </ol>
     <aside class="model">
       <svg viewBox="0 0 360 430" role="img" aria-label="Modelo de dos masas con base excitada">
-        <rect class="m" x="70" y="22" width="150" height="66" rx="4"/>
+        <rect class="m m2" x="70" y="22" width="150" height="66" rx="12"/>
         <text x="145" y="52" text-anchor="middle">m₂</text>
         <text class="s" x="145" y="72" text-anchor="middle">piso, pinza, celular</text>
         <!-- k2 / c2 -->
-        <path class="ln" d="M105 88 v14 l-12 6 l24 10 l-24 10 l24 10 l-24 10 l24 10 l-12 6 v14"/>
-        <path class="ln" d="M185 88 v34 M171 122 h28 M175 112 v32 h20 v-32 M185 134 v54"/>
-        <text class="k" x="62" y="146" text-anchor="end">k₂</text>
-        <text class="k" x="208" y="146">c₂</text>
-        <rect class="m" x="70" y="188" width="150" height="66" rx="4"/>
+        <path class="ln k2 spring" d="M105 88 v14 l-12 6 l24 10 l-24 10 l24 10 l-24 10 l24 10 l-12 6 v14"/>
+        <path class="ln k2" d="M185 88 v34 M171 122 h28 M175 112 v32 h20 v-32 M185 134 v54"/>
+        <text class="t2" x="62" y="146" text-anchor="end">k₂</text>
+        <text class="t2" x="208" y="146">c₂</text>
+        <rect class="m m1" x="70" y="188" width="150" height="66" rx="12"/>
         <text x="145" y="218" text-anchor="middle">m₁</text>
         <text class="s" x="145" y="238" text-anchor="middle">placa m1 + rieles</text>
         <!-- k1 / c1 -->
-        <path class="ln" d="M105 254 v14 l-12 6 l24 10 l-24 10 l24 10 l-24 10 l24 10 l-12 6 v14"/>
-        <path class="ln" d="M185 254 v34 M171 288 h28 M175 278 v32 h20 v-32 M185 300 v54"/>
-        <text class="k" x="62" y="312" text-anchor="end">k₁</text>
-        <text class="k" x="208" y="312">c₁</text>
-        <rect class="gnd" x="60" y="354" width="170" height="12" rx="2"/>
+        <path class="ln k1 spring b" d="M105 254 v14 l-12 6 l24 10 l-24 10 l24 10 l-24 10 l24 10 l-12 6 v14"/>
+        <path class="ln k1" d="M185 254 v34 M171 288 h28 M175 278 v32 h20 v-32 M185 300 v54"/>
+        <text class="t1" x="62" y="312" text-anchor="end">k₁</text>
+        <text class="t1" x="208" y="312">c₁</text>
+        <rect class="gnd" x="60" y="354" width="170" height="12" rx="6"/>
         <path class="ln" d="M70 374 l-10 12 M95 374 l-10 12 M120 374 l-10 12 M145 374 l-10 12 M170 374 l-10 12 M195 374 l-10 12 M220 374 l-10 12" style="stroke:var(--muted);stroke-width:1.5"/>
         <text class="s" x="145" y="410" text-anchor="middle">base en el manubrio</text>
         <!-- desplazamientos -->
@@ -209,69 +340,83 @@ a.card span{color:var(--muted);font-size:15px}
   </div>
 </section>
 
-<section id="piezas">
+<section id="piezas" class="rv">
   <div class="sechead">
+    <span class="kicker">Lista de compras</span>
     <h2>Materiales que ocupamos</h2>
     <p>Todo lo que lleva un soporte, con sus medidas.</p>
   </div>
+  <div class="filter" role="group" aria-label="Filtrar materiales">
+    <button data-f="all" aria-pressed="true">Todo</button><button data-f="p" aria-pressed="false">Impresión 3D</button><button data-f="b" aria-pressed="false">Comprado</button><button data-f="t" aria-pressed="false">Tornillería</button>
+  </div>
   <div class="tbl">
-    <table>
+    <table class="mat">
       <thead><tr><th>Material</th><th class="n">Cant.</th></tr></thead>
       <tbody>
-          <tr><td>Base en H + bloque en V<small>impresión 3D · 114 × 68 × 34 mm</small></td><td class="n">1</td></tr>
-          <tr><td>Placa m1 con topes y pilares<small>impresión 3D · 112 × 90 mm</small></td><td class="n">1</td></tr>
-          <tr><td>Piso m2 + respaldo<small>impresión 3D · 102 × 88 mm, respaldo a 15°</small></td><td class="n">1</td></tr>
-          <tr><td>Separador de pilar<small>impresión 3D · 12 × 16 × 15.9 mm · 2 verdes y 2 amarillos</small></td><td class="n">4</td></tr>
-          <tr><td>Tapa de pilar<small>impresión 3D · 12 × 16 × 3 mm · 2 verdes y 2 amarillas</small></td><td class="n">4</td></tr>
-          <tr><td>Pinza: cuerpo, tapa, 2 brazos, engrane y perilla<small>impresión 3D · engrane de 12 dientes, módulo 1.5</small></td><td class="n">6</td></tr>
-          <tr><td>Buje de hule Ø16 × 20, barreno 5<small>o imprimir en TPU</small></td><td class="n">4</td></tr>
-          <tr><td>Riel de acero cuadrado 1/2″<small>112 mm · 7 barrenos Ø1.2</small></td><td class="n">2</td></tr>
-          <tr><td>Barra de acero cuadrada 3/8″<small>96 mm · 6 barrenos Ø1.2</small></td><td class="n">2</td></tr>
-          <tr><td>Cable de acero 1/32″<small>espiral Ø39, 6 vueltas, paso 18</small></td><td class="n">2</td></tr>
-          <tr><td>Lámina de acero de resorte<small>hoja de calibrador 0.08–0.15 × 13 × 74 mm</small></td><td class="n">4</td></tr>
-          <tr><td>Goma de tope Ø16 × 12</td><td class="n">2</td></tr>
-          <tr><td>Abrazadera en U M5<small>34 mm entre barrenos</small></td><td class="n">1</td></tr>
-          <tr><td>Tornillo M4 × 40<small>bujes</small></td><td class="n">4</td></tr>
-          <tr><td>Tornillo M4 × 65<small>pilares verdes</small></td><td class="n">2</td></tr>
-          <tr><td>Tornillo M3 × 35<small>pilares amarillos</small></td><td class="n">2</td></tr>
-          <tr><td>Tornillo M3 × 30<small>4 en los rieles y 4 en las barras</small></td><td class="n">8</td></tr>
-          <tr><td>Tornillo M4 × 16<small>pinza al respaldo</small></td><td class="n">2</td></tr>
-          <tr><td>Tornillo M5 × 80 rosca completa + 3 tuercas<small>pinza</small></td><td class="n">1</td></tr>
-          <tr><td>Tuerca de nylon M4</td><td class="n">6</td></tr>
-          <tr><td>Tuerca de nylon M3</td><td class="n">10</td></tr>
+          <tr data-k="p" style="--c:var(--c-base)"><td>Base en H + bloque en V<small>impresión 3D · 114 × 68 × 34 mm</small></td><td class="n"><span>1</span></td></tr>
+          <tr data-k="p" style="--c:var(--c-m1)"><td>Placa m1 con topes y pilares<small>impresión 3D · 112 × 90 mm</small></td><td class="n"><span>1</span></td></tr>
+          <tr data-k="p" style="--c:var(--c-m2)"><td>Piso m2 + respaldo<small>impresión 3D · 102 × 88 mm, respaldo a 15°</small></td><td class="n"><span>1</span></td></tr>
+          <tr data-k="p" style="--c:var(--c-e2)"><td>Separador de pilar<small>impresión 3D · 12 × 16 × 15.9 mm · 2 verdes y 2 amarillos</small></td><td class="n"><span>4</span></td></tr>
+          <tr data-k="p" style="--c:var(--c-e2)"><td>Tapa de pilar<small>impresión 3D · 12 × 16 × 3 mm · 2 verdes y 2 amarillas</small></td><td class="n"><span>4</span></td></tr>
+          <tr data-k="p" style="--c:var(--c-pinza)"><td>Pinza: cuerpo, tapa, 2 brazos, engrane y perilla<small>impresión 3D · engrane de 12 dientes, módulo 1.5</small></td><td class="n"><span>6</span></td></tr>
+          <tr data-k="b" style="--c:var(--c-e1)"><td>Buje de hule Ø16 × 20, barreno 5<small>o imprimir en TPU</small></td><td class="n"><span>4</span></td></tr>
+          <tr data-k="b" style="--c:var(--c-m1)"><td>Riel de acero cuadrado 1/2″<small>112 mm · 7 barrenos Ø1.2</small></td><td class="n"><span>2</span></td></tr>
+          <tr data-k="b" style="--c:var(--c-m2)"><td>Barra de acero cuadrada 3/8″<small>96 mm · 6 barrenos Ø1.2</small></td><td class="n"><span>2</span></td></tr>
+          <tr data-k="b" style="--c:var(--c-e2)"><td>Cable de acero 1/32″<small>espiral Ø39, 6 vueltas, paso 18</small></td><td class="n"><span>2</span></td></tr>
+          <tr data-k="b" style="--c:var(--c-e2)"><td>Lámina de acero de resorte<small>hoja de calibrador 0.08–0.15 × 13 × 74 mm</small></td><td class="n"><span>4</span></td></tr>
+          <tr data-k="b" style="--c:var(--c-e2)"><td>Goma de tope Ø16 × 12</td><td class="n"><span>2</span></td></tr>
+          <tr data-k="b" style="--c:var(--c-base)"><td>Abrazadera en U M5<small>34 mm entre barrenos</small></td><td class="n"><span>1</span></td></tr>
+          <tr data-k="t" style="--c:var(--c-e1)"><td>Tornillo M4 × 40<small>bujes</small></td><td class="n"><span>4</span></td></tr>
+          <tr data-k="t" style="--c:var(--c-e2)"><td>Tornillo M4 × 65<small>pilares verdes</small></td><td class="n"><span>2</span></td></tr>
+          <tr data-k="t" style="--c:var(--c-e2)"><td>Tornillo M3 × 35<small>pilares amarillos</small></td><td class="n"><span>2</span></td></tr>
+          <tr data-k="t" style="--c:var(--c-m1)"><td>Tornillo M3 × 30<small>4 en los rieles y 4 en las barras</small></td><td class="n"><span>8</span></td></tr>
+          <tr data-k="t" style="--c:var(--c-pinza)"><td>Tornillo M4 × 16<small>pinza al respaldo</small></td><td class="n"><span>2</span></td></tr>
+          <tr data-k="t" style="--c:var(--c-pinza)"><td>Tornillo M5 × 80 rosca completa + 3 tuercas<small>pinza</small></td><td class="n"><span>1</span></td></tr>
+          <tr data-k="t" style="--c:var(--c-base)"><td>Tuerca de nylon M4</td><td class="n"><span>6</span></td></tr>
+          <tr data-k="t" style="--c:var(--c-base)"><td>Tuerca de nylon M3</td><td class="n"><span>10</span></td></tr>
       </tbody>
     </table>
   </div>
 </section>
 
-<section id="cambios">
+<section id="cambios" class="rv">
   <div class="sechead">
-    <h2>Qué cambió desde la versión C</h2>
+    <span class="kicker">Versión C → final</span>
+    <h2>Qué cambió</h2>
     <p>El principio es el mismo que en la versión C: dos masas, bujes abajo y cables arriba. Cambiaron las piezas.</p>
   </div>
-  <div class="tbl">
-    <table class="cmp">
-      <thead><tr><th>Parte</th><th>Versión C</th><th>Modelo final</th></tr></thead>
-      <tbody>
-        <tr><td>Base</td><td>Placa base 132 × 120 × 8 mm y bloque en V aparte</td><td>Base en H con el bloque en V en una sola pieza, 114 × 68 × 34 mm</td></tr>
-        <tr><td>Masa m₁</td><td>Caja de PETG con solera de acero 1½″ × ¼″</td><td>Placa m1 con 2 rieles de acero de 1/2″ que hacen de lastre</td></tr>
-        <tr><td>Anclaje del cable</td><td>Barras inferiores y superiores impresas</td><td>Rieles de 1/2″ abajo y barras de 3/8″ arriba, de acero, con barrenos de Ø1.2</td></tr>
-        <tr><td>Guía</td><td>4 postes y 4 láminas de fleje de 14 × 50 mm</td><td>4 láminas de hoja de calibrador de 13 × 74 mm en pilares con separador y tapa</td></tr>
-        <tr><td>Topes</td><td>Tope central impreso</td><td>2 gomas de tope Ø16 × 12</td></tr>
-        <tr><td>Porta-celular</td><td>Placa superior y porta-celular con escuadra de 15°</td><td>Piso m2 con respaldo de 15° y pinza de cremallera que centra el celular</td></tr>
-        <tr><td>Tornillos de bujes</td><td>M4 × 50</td><td>M4 × 40</td></tr>
-      </tbody>
-    </table>
+  <div class="cmp">
+    <article><h3>Base</h3><div class="vs"><span class="old">Placa base 132 × 120 × 8 mm y bloque en V aparte</span><span class="arrow">→</span><span class="new">Base en H con el bloque en V en una sola pieza, 114 × 68 × 34 mm</span></div></article>
+    <article><h3>Masa m₁</h3><div class="vs"><span class="old">Caja de PETG con solera de acero 1½″ × ¼″</span><span class="arrow">→</span><span class="new">Placa m1 con 2 rieles de acero de 1/2″ que hacen de lastre</span></div></article>
+    <article><h3>Anclaje del cable</h3><div class="vs"><span class="old">Barras inferiores y superiores impresas</span><span class="arrow">→</span><span class="new">Rieles de 1/2″ abajo y barras de 3/8″ arriba, de acero, con barrenos de Ø1.2</span></div></article>
+    <article><h3>Guía</h3><div class="vs"><span class="old">4 postes y 4 láminas de fleje de 14 × 50 mm</span><span class="arrow">→</span><span class="new">4 láminas de hoja de calibrador de 13 × 74 mm en pilares con separador y tapa</span></div></article>
+    <article><h3>Topes</h3><div class="vs"><span class="old">Tope central impreso</span><span class="arrow">→</span><span class="new">2 gomas de tope Ø16 × 12</span></div></article>
+    <article><h3>Porta-celular</h3><div class="vs"><span class="old">Placa superior y porta-celular con escuadra de 15°</span><span class="arrow">→</span><span class="new">Piso m2 con respaldo de 15° y pinza de cremallera que centra el celular</span></div></article>
+    <article><h3>Tornillos de bujes</h3><div class="vs"><span class="old">M4 × 50</span><span class="arrow">→</span><span class="new">M4 × 40</span></div></article>
   </div>
 </section>
 
-<section id="simulaciones">
-  <div class="sechead">
-    <h2>Simulaciones</h2>
-  </div>
-  <a class="card" href="https://amongoooo.github.io/proyecto-final-soporte-antivibracion/simulaciones.html" target="_blank" rel="noopener"><h3>Abrir las simulaciones</h3><span>Onda del manubrio, transmisibilidad, modos, rígido contra el soporte, mecido y prueba de soltar.</span></a>
+<section id="simulaciones" class="rv">
+  <a class="hero" href="https://amongoooo.github.io/proyecto-final-soporte-antivibracion/simulaciones.html" target="_blank" rel="noopener">
+    <svg class="wave" viewBox="0 0 400 160" aria-hidden="true"><path d="M0 80 C 40 10, 60 10, 100 80 S 160 150, 200 80 S 260 30, 300 80 S 360 120, 400 80" fill="none" stroke="#fff" stroke-width="6" stroke-linecap="round"/></svg>
+    <span class="kicker" style="color:#fff;opacity:.85">Simulaciones</span>
+    <h3>Mira cómo se mueve</h3>
+    <div class="chips"><span>Onda del manubrio</span><span>Transmisibilidad</span><span>Modos</span><span>Rígido contra soporte</span><span>Mecido</span><span>Prueba de soltar</span></div>
+    <span class="go">Abrir las simulaciones ↗</span>
+  </a>
 </section>
 </main>
+
+<nav class="tabs glass" aria-label="Secciones">
+  <div class="track">
+    <span class="pill" aria-hidden="true"></span>
+    <a href="#modelo" aria-current="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"><path d="M12 3 20 7.5v9L12 21l-8-4.5v-9z"/><path d="M4 7.5 12 12l8-4.5M12 12v9"/></svg><span class="lbl">Modelo</span></a>
+    <a href="#funciona"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2v3l-5 2 10 3-10 3 10 3-5 2v4"/></svg><span class="lbl">Cómo funciona</span></a>
+    <a href="#piezas"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M8 6h13M8 12h13M8 18h13"/><circle cx="3.5" cy="6" r="1"/><circle cx="3.5" cy="12" r="1"/><circle cx="3.5" cy="18" r="1"/></svg><span class="lbl">Materiales</span></a>
+    <a href="#cambios"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 8h14l-4-4M20 16H6l4 4"/></svg><span class="lbl">Cambios</span></a>
+    <a href="#simulaciones"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M2 12c2.5-6 4.5-6 7 0s4.5 6 7 0 4.5-6 6 0"/></svg><span class="lbl">Simulaciones</span></a>
+  </div>
+</nav>
 
 <script>window.MathJax={tex:{inlineMath:[['\\(','\\)']]},svg:{fontCache:'global'}};</script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/3.2.2/es5/tex-svg.min.js" async></script>
@@ -372,12 +517,14 @@ const byName={}; pick.forEach(m=>{const n=m.userData.name;(byName[n]=byName[n]||
 const kind=info=>/^Impres/.test(info)?['impresa','']:/^Referencia/.test(info)?['referencia','ref']:['comprada','buy'];
 const list=document.getElementById('list'), detail=document.getElementById('detail');
 const rows={};
-GROUPS.forEach(([t,names])=>{
-  const h=document.createElement('div'); h.className='grp'; h.textContent=t; list.appendChild(h);
+const GROUP_C=['--c-base','--c-e1','--c-m1','--c-e2','--c-m2','--c-pinza'];
+GROUPS.forEach(([t,names],gi)=>{
+  const gc=`var(${GROUP_C[gi]})`;
+  const h=document.createElement('div'); h.className='grp'; h.textContent=t; h.style.setProperty('--c',gc); list.appendChild(h);
   names.forEach(n=>{
     if(!byName[n])return;
     const u=byName[n][0].userData, [k,cls]=kind(u.info);
-    const b=document.createElement('button'); b.type='button'; b.setAttribute('aria-pressed','false');
+    const b=document.createElement('button'); b.type='button'; b.setAttribute('aria-pressed','false'); b.style.setProperty('--c',gc); b.dataset.c=gc;
     b.innerHTML=`<i class="dot" style="background:${u.color}"></i><span></span><span class="tag ${cls}">${k}</span>`;
     b.children[1].textContent=n.replace(/"/g,'″');
     b.onclick=()=>select(sel===n?null:n);
@@ -399,9 +546,11 @@ function look(){
 function select(n){
   sel=n;
   Object.entries(rows).forEach(([k,b])=>b.setAttribute('aria-pressed',k===n?'true':'false'));
+  detail.classList.remove('on'); void detail.offsetWidth;
   if(!n){detail.innerHTML='<strong>Ninguna pieza seleccionada</strong><span class="i">Elige una en la lista o tócala en el modelo.</span>';}
   else{
     const u=byName[n][0].userData;
+    detail.classList.add('on'); detail.style.setProperty('--sel',rows[n]?rows[n].dataset.c:'var(--accent)');
     detail.innerHTML=`<strong><i class="dot" style="background:${u.color}"></i><span></span></strong><span class="i"></span>`;
     detail.querySelector('strong span').textContent=n.replace(/"/g,'″');
     detail.querySelector('.i').textContent=u.info;
@@ -412,18 +561,19 @@ function select(n){
 
 /* explosionado y controles */
 const ex=document.getElementById('ex'), exv=document.getElementById('exv');
-function explode(){const e=+ex.value; exv.textContent=e+' mm'; movers.forEach(o=>{const s=o.userData.stage;o.position.copy(o.userData.base);o.position.z+=Math.max(s,0)*e*(s>=3?1.15:1)+(s<0?s*e*0.6:0);});}
+function explode(){const e=+ex.value; exv.textContent=e+' mm'; ex.style.setProperty('--p',(e/+ex.max*100)+'%'); movers.forEach(o=>{const s=o.userData.stage;o.position.copy(o.userData.base);o.position.z+=Math.max(s,0)*e*(s>=3?1.15:1)+(s<0?s*e*0.6:0);});}
 ex.oninput=explode;
 document.getElementById('ph').onchange=e=>phone.visible=e.target.checked;
 document.getElementById('mb').onchange=e=>{manub.visible=e.target.checked;ubolt.visible=e.target.checked;};
 tp.onchange=look;
 
 const views={iso:[260,-330,260],frente:[0,-460,90],lado:[460,0,100],atras:[-120,420,230]};
-document.querySelectorAll('[data-v]').forEach(b=>b.onclick=()=>{cam.position.set(...views[b.dataset.v]);ctl.target.set(0,10,75);ctl.update();});
+document.querySelectorAll('[data-v]').forEach(b=>b.onclick=()=>{cam.position.set(...views[b.dataset.v]);ctl.target.set(0,10,75);ctl.update();
+  document.querySelectorAll('[data-v]').forEach(o=>o.setAttribute('aria-pressed',o===b?'true':'false'));movePill(b);});
 cam.position.set(...views.iso); explode();
 
 const ray=new THREE.Raycaster(), mouse=new THREE.Vector2(); let down=null;
-canvas.addEventListener('pointerdown',e=>down=[e.clientX,e.clientY]);
+canvas.addEventListener('pointerdown',e=>{down=[e.clientX,e.clientY];document.getElementById('hint').classList.add('off');});
 canvas.addEventListener('pointerup',e=>{
   if(!down||Math.hypot(e.clientX-down[0],e.clientY-down[1])>5)return;
   const r=canvas.getBoundingClientRect(); mouse.set((e.clientX-r.left)/r.width*2-1,-(e.clientY-r.top)/r.height*2+1);
@@ -438,6 +588,32 @@ canvas.addEventListener('pointerup',e=>{
 function resize(){const w=stage.clientWidth,h=stage.clientHeight;renderer.setSize(w,h,false);cam.aspect=w/h;cam.updateProjectionMatrix();}
 new ResizeObserver(resize).observe(stage); resize();
 (function loop(){requestAnimationFrame(loop);ctl.update();renderer.render(scene,cam);})();
+</script>
+<script>
+/* Píldora que se desliza con resorte (segmentado de vistas y barra de secciones), como en Teoría Musical */
+function movePill(el){const pill=el.parentElement.querySelector('.pill');if(!pill)return;
+  pill.style.width=el.offsetWidth+'px';pill.style.transform=`translateX(${el.offsetLeft}px)`;}
+const segOn=()=>{const b=document.querySelector('[data-v][aria-pressed="true"]');b&&movePill(b);};
+const tabs=[...document.querySelectorAll('.tabs a')];
+function setTab(a){tabs.forEach(t=>t.setAttribute('aria-current',t===a?'true':'false'));
+  requestAnimationFrame(()=>{movePill(a);const tr=a.parentElement;tr.scrollTo({left:a.offsetLeft-(tr.clientWidth-a.offsetWidth)/2,behavior:'smooth'});});}
+tabs.forEach(a=>a.addEventListener('click',()=>setTab(a)));
+const secs=tabs.map(a=>document.querySelector(a.getAttribute('href')));
+function spy(){let cur=tabs[0];const y=innerHeight*.45;secs.forEach((s,i)=>{if(s.getBoundingClientRect().top<y)cur=tabs[i];});
+  if(cur.getAttribute('aria-current')!=='true')setTab(cur);}
+addEventListener('scroll',spy,{passive:true});
+addEventListener('resize',()=>{segOn();movePill(document.querySelector('.tabs a[aria-current="true"]'));});
+document.fonts&&document.fonts.ready.then(()=>{segOn();setTab(document.querySelector('.tabs a[aria-current="true"]'));});
+segOn();setTab(tabs[0]);spy();
+/* aparecer al llegar */
+const io=new IntersectionObserver(es=>es.forEach(e=>{if(e.isIntersecting){e.target.classList.add('in');io.unobserve(e.target);}}),{rootMargin:'0px 0px -8% 0px'});
+document.querySelectorAll('.rv,.steps li,.cmp article').forEach((el,i)=>{el.classList.add('rv');el.style.transitionDelay=(el.matches('.steps li,.cmp article')?(i%7)*50:0)+'ms';io.observe(el);});
+/* número del valor que salta al moverlo */
+const exo=document.getElementById('exv');document.getElementById('ex').addEventListener('input',()=>{exo.classList.add('pop');clearTimeout(exo._t);exo._t=setTimeout(()=>exo.classList.remove('pop'),160);});
+/* filtro de materiales */
+const fb=[...document.querySelectorAll('.filter button')];
+fb.forEach(b=>b.onclick=()=>{fb.forEach(o=>o.setAttribute('aria-pressed',o===b?'true':'false'));
+  document.querySelectorAll('.mat tbody tr').forEach(r=>r.classList.toggle('hide',b.dataset.f!=='all'&&r.dataset.k!==b.dataset.f));});
 </script>
 
 </body>
